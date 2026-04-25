@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Board: Kolaborasi Virtual</title>
+    <style>
+        /* CSS: Tampilan & Estetika */
+        :root {
+            --k-pink: #ffafcc;
+            --k-purple: #cdb4db;
+            --k-blue: #a2d2ff;
+            --k-dark: #2d3436;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        header {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            z-index: 1000;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--k-dark);
+        }
+
+        .logo span { color: var(--k-pink); }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-add { background-color: var(--k-blue); color: white; }
+        .btn-clear { background-color: #fab1a0; color: white; }
+        button:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        /* Board Area */
+        #board {
+            width: 100%;
+            height: calc(100vh - 80px);
+            position: relative;
+            overflow: auto;
+            background-image: 
+                radial-gradient(var(--k-purple) 0.5px, transparent 0.5px),
+                radial-gradient(var(--k-purple) 0.5px, #f8f9fa 0.5px);
+            background-size: 30px 30px;
+        }
+
+        /* Note Style */
+        .note {
+            position: absolute;
+            width: 280px;
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            cursor: grab;
+            transition: box-shadow 0.3s;
+            border-top: 5px solid var(--k-pink);
+        }
+
+        .note:active { cursor: grabbing; box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .delete-btn {
+            background: none;
+            color: #ff7675;
+            padding: 0;
+            font-size: 1.2rem;
+        }
+
+        .note textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            resize: none;
+            color: #444;
+            background: transparent;
+        }
+
+        .note img, .note video {
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .note a {
+            color: var(--k-blue);
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 0.9rem;
+        }
+
+        /* Player K-Pop */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            z-index: 2000;
+        }
+
+        audio { height: 30px; width: 200px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">K-<span>Board</span> 🫰</div>
+        <div class="toolbar">
+            <button class="btn-add" onclick="createNote('text')">📝 Text</button>
+            <button class="btn-add" onclick="createNote('image')">🖼️ Foto</button>
+            <button class="btn-add" onclick="createNote('video')">🎥 Video/Link</button>
+            <button class="btn-clear" onclick="clearBoard()">🧹 Bersihkan</button>
+        </div>
+    </header>
+
+    <div id="board">
+        <!-- Konten akan ditambahkan di sini -->
+    </div>
+
+    <!-- K-Pop Background Music -->
+    <div class="music-player">
+        <div style="font-size: 1.2rem;">🎶</div>
+        <audio id="kpop-audio" controls loop>
+            <!-- Ganti src dengan file MP3 K-pop milikmu -->
+            <source src="https://www.bensound.com/bensound-music/bensound-lofifive.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script>
+        // JS: Logika Interaksi
+        const board = document.getElementById('board');
+
+        function createNote(type) {
+            const note = document.createElement('div');
+            note.className = 'note';
+            
+            // Posisi acak saat pertama kali muncul
+            note.style.left = (Math.random() * (window.innerWidth - 300)) + 'px';
+            note.style.top = (Math.random() * (window.innerHeight - 300)) + 'px';
+
+            let contentHTML = '';
+
+            if (type === 'text') {
+                contentHTML = `<textarea placeholder="Tulis ide di sini..." rows="4"></textarea>`;
+            } else if (type === 'image') {
+                const url = prompt("Masukkan URL Gambar (JPG/PNG/GIF):");
+                if (!url) return;
+                contentHTML = `<img src="${url}" onerror="this.src='https://via.placeholder.com/150?text=Error+Loading+Image'">`;
+            } else if (type === 'video') {
+                const url = prompt("Masukkan URL Tautan atau Video:");
+                if (!url) return;
+                contentHTML = `<a href="${url}" target="_blank">🔗 Klik untuk buka tautan</a>`;
+            }
+
+            note.innerHTML = `
+                <div class="note-header">
+                    <span>📌 ${type.toUpperCase()}</span>
+                    <button class="delete-btn" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+                ${contentHTML}
+            `;
+
+            makeDraggable(note);
+            board.appendChild(note);
+        }
+
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        function clearBoard() {
+            if(confirm("Hapus semua tempelan di papan?")) {
+                board.innerHTML = '';
+            }
+        }
+
+        // Tips untuk Github:
+        // Untuk menjadikan ini realtime secara nyata, kamu perlu menghubungkan
+        // variabel 'note' ke Firebase Database agar koordinatnya tersinkron.
+    </script>
+</body>
+</html>
